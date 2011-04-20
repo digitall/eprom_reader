@@ -1,0 +1,55 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+<title>EPROM Reader</title>
+</head><body>
+
+This is a simple circuit for reading many common EPROM and Flash memory 
+chips. It has a USB interface that uses the popular FTDI USB to serial 
+chip. The FTDI chip is well supported by Linux, OS-X, and Windows. 
+Ordinary terminal software is all that is required to read the chip. 
+Intel hex and raw binary formats can be sent unencapsulated or by 
+Y-Modem.<br><br>
+There are no jumpers required for configuration. Power can be supplied 
+on the appropriate pin by three 2N4403 transistors. The intelligence of 
+the PIC18F4550 firmware handles the various differences of the range of 
+EPROM chips.<br><br>
+
+<a href="EPROM%20Reader_files/eprom_reader_schematic.png"><img src="EPROM%20Reader_files/eprom_reader_schematic_sm.png"></a><br><br>
+
+<a href="http://www.compendiumarcana.com/eprom/eprom_reader.jpg"><img src="EPROM%20Reader_files/eprom_reader_sm.jpg"></a><br><br>
+
+A few single character commands are used to configure and operate the EPROM reader.<br><br>
+
+<table border="1">
+<tbody><tr><th>Command</th><th>Function</th></tr>
+<tr><td>r</td><td>Read EPROM</td></tr>
+<tr><td>h</td><td>Hex File</td></tr>
+<tr><td>b</td><td>Binary File</td></tr>
+<tr><td>o</td><td>Show Configuration</td></tr>
+<tr><td>1</td><td>2K 2716</td></tr>
+<tr><td>2</td><td>4K 2732</td></tr>
+<tr><td>3</td><td>8K 2764</td></tr>
+<tr><td>4</td><td>16K 27128</td></tr>
+<tr><td>5</td><td>32K 27256</td></tr>
+<tr><td>6</td><td>64K 27512</td></tr>
+<tr><td>7</td><td>128K 27C010</td></tr>
+<tr><td>8</td><td>256K 27C020</td></tr>
+<tr><td>9</td><td>512K 27C040</td></tr>
+<tr><td>0</td><td>1M 27C080</td></tr>
+</tbody></table><br><br>
+
+
+The 'h' command selects Intel hex, and then the 'r' command displayes the EPROM contents.<br><br>
+
+<img src="EPROM%20Reader_files/read_eprom.png"><br><br>
+
+
+The 'b' command select binary format and Y-Modem is used to ensure accurate capture of the binary data.<br><br>
+
+<img src="EPROM%20Reader_files/eprom_download.png"><br><br>
+
+<br>
+
+<a href="http://www.compendiumarcana.com/eprom/eprom_reader.zip">Download Source Code and Schematic</a>
+
+</body></html>
