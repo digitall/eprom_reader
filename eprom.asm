@@ -209,6 +209,8 @@ Start
 	call		SerTx
 	call		CRLF
 
+	call		ShowHelp
+
 GetCmd
 	movlw		'>'
 	call		SerTx
@@ -278,6 +280,8 @@ DispatchCmd
 	call		SerTx
 	movlw		'?'
 	call		SerTx
+	call		CRLF
+	call		ShowHelp
 	goto		CRLF
 
 SetHexMode
@@ -466,6 +470,496 @@ Setup82S191											; Setup for 82S191 - 2K byte
 													;
 	movlw		(1<<fcA10)|(1<<fcA11asA10)|(1<<fcCE); Enable
 	movwf		ctl_mask							;
+
+	return
+
+ShowHelp
+	movlw		'H'
+	call		SerTx
+	movlw		'e'
+	call		SerTx
+	movlw		'l'
+	call		SerTx
+	movlw		'p'
+	call		SerTx
+	call		ColonSpace
+	call		CRLF
+
+; r  Read EPROM
+	movlw		'r'
+	call		SerTx
+	call		ColonSpace
+	movlw		'R'
+	call		SerTx
+	movlw		'e'
+	call		SerTx
+	movlw		'a'
+	call		SerTx
+	movlw		'd'
+	call		SerTx
+	movlw		' '
+	call		SerTx
+	movlw		'E'
+	call		SerTx
+	movlw		'P'
+	call		SerTx
+	movlw		'R'
+	call		SerTx
+	movlw		'O'
+	call		SerTx
+	movlw		'M'
+	call		SerTx
+	call		CRLF
+
+; b  Binary
+	movlw		'b'
+	call		SerTx
+	call		ColonSpace
+	movlw		'B'
+	call		SerTx
+	movlw		'i'
+	call		SerTx
+	movlw		'n'
+	call		SerTx
+	movlw		'a'
+	call		SerTx
+	movlw		'r'
+	call		SerTx
+	movlw		'y'
+	call		SerTx
+	call		CRLF
+
+; h  Hex
+	movlw		'h'
+	call		SerTx
+	call		ColonSpace
+	movlw		'H'
+	call		SerTx
+	movlw		'e'
+	call		SerTx
+	movlw		'x'
+	call		SerTx
+	call		CRLF
+
+; o  Configuration
+	movlw		'o'
+	call		SerTx
+	call		ColonSpace
+	movlw		'C'
+	call		SerTx
+	movlw		'o'
+	call		SerTx
+	movlw		'n'
+	call		SerTx
+	movlw		'f'
+	call		SerTx
+	movlw		'i'
+	call		SerTx
+	movlw		'g'
+	call		SerTx
+	movlw		'u'
+	call		SerTx
+	movlw		'r'
+	call		SerTx
+	movlw		'a'
+	call		SerTx
+	movlw		't'
+	call		SerTx
+	movlw		'i'
+	call		SerTx
+	movlw		'o'
+	call		SerTx
+	movlw		'n'
+	call		SerTx
+	call		CRLF
+
+; `   1K 82S181, RY1133 (512B TBP28S42N)
+	movlw		'`'
+	call		SerTx
+	call		ColonSpace
+	movlw		'1'
+	call		SerTx
+	movlw		'K'
+	call		SerTx
+	movlw		' '
+	call		SerTx
+	movlw		'8'
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'S'
+	call		SerTx
+	movlw		'1'
+	call		SerTx
+	movlw		'8'
+	call		SerTx
+	movlw		'1'
+	call		SerTx
+	movlw		','
+	call		SerTx
+	movlw		' '
+	call		SerTx
+	movlw		'R'
+	call		SerTx
+	movlw		'Y'
+	call		SerTx
+	movlw		'1'
+	call		SerTx
+	movlw		'1'
+	call		SerTx
+	movlw		'3'
+	call		SerTx
+	movlw		'3'
+	call		SerTx
+	movlw		' '
+	call		SerTx
+	movlw		'('
+	call		SerTx
+	movlw		'5'
+	call		SerTx
+	movlw		'1'
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'B'
+	call		SerTx
+	movlw		' '
+	call		SerTx
+	movlw		'T'
+	call		SerTx
+	movlw		'B'
+	call		SerTx
+	movlw		'P'
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'8'
+	call		SerTx
+	movlw		'S'
+	call		SerTx
+	movlw		'4'
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'N'
+	call		SerTx
+	movlw		')'
+	call		SerTx
+	call		CRLF
+
+; !   2K 82S191, TPB28L166, MB7138
+	movlw		'!'
+	call		SerTx
+	call		ColonSpace
+	movlw		'2'
+	call		SerTx
+	movlw		'K'
+	call		SerTx
+	movlw		' '
+	call		SerTx
+	movlw		'8'
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'S'
+	call		SerTx
+	movlw		'1'
+	call		SerTx
+	movlw		'9'
+	call		SerTx
+	movlw		'1'
+	call		SerTx
+	movlw		','
+	call		SerTx
+	movlw		' '
+	call		SerTx
+	movlw		'T'
+	call		SerTx
+	movlw		'P'
+	call		SerTx
+	movlw		'B'
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'8'
+	call		SerTx
+	movlw		'L'
+	call		SerTx
+	movlw		'1'
+	call		SerTx
+	movlw		'6'
+	call		SerTx
+	movlw		'6'
+	call		SerTx
+	movlw		','
+	call		SerTx
+	movlw		' '
+	call		SerTx
+	movlw		'M'
+	call		SerTx
+	movlw		'B'
+	call		SerTx
+	movlw		'7'
+	call		SerTx
+	movlw		'1'
+	call		SerTx
+	movlw		'3'
+	call		SerTx
+	movlw		'8'
+	call		SerTx
+	call		CRLF
+
+; 1   2K 27C16
+	movlw		'1'
+	call		SerTx
+	call		ColonSpace
+	movlw		'2'
+	call		SerTx
+	movlw		'K'
+	call		SerTx
+	movlw		' '
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'7'
+	call		SerTx
+	movlw		'C'
+	call		SerTx
+	movlw		'1'
+	call		SerTx
+	movlw		'6'
+	call		SerTx
+	call		CRLF
+
+; 2   4K 27C32
+	movlw		'2'
+	call		SerTx
+	call		ColonSpace
+	movlw		'4'
+	call		SerTx
+	movlw		'K'
+	call		SerTx
+	movlw		' '
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'7'
+	call		SerTx
+	movlw		'C'
+	call		SerTx
+	movlw		'3'
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	call		CRLF
+
+; 3   8K 27C64
+	movlw		'3'
+	call		SerTx
+	call		ColonSpace
+	movlw		'8'
+	call		SerTx
+	movlw		'K'
+	call		SerTx
+	movlw		' '
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'7'
+	call		SerTx
+	movlw		'C'
+	call		SerTx
+	movlw		'6'
+	call		SerTx
+	movlw		'4'
+	call		SerTx
+	call		CRLF
+
+; 4  16K 27C128
+	movlw		'4'
+	call		SerTx
+	call		ColonSpace
+	movlw		'1'
+	call		SerTx
+	movlw		'6'
+	call		SerTx
+	movlw		'K'
+	call		SerTx
+	movlw		' '
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'7'
+	call		SerTx
+	movlw		'C'
+	call		SerTx
+	movlw		'1'
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'8'
+	call		SerTx
+	call		CRLF
+
+; 5  32K 27C256
+	movlw		'5'
+	call		SerTx
+	call		ColonSpace
+	movlw		'3'
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'K'
+	call		SerTx
+	movlw		' '
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'7'
+	call		SerTx
+	movlw		'C'
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'5'
+	call		SerTx
+	movlw		'6'
+	call		SerTx
+	call		CRLF
+
+; 6  64K 27C512
+	movlw		'6'
+	call		SerTx
+	call		ColonSpace
+	movlw		'6'
+	call		SerTx
+	movlw		'4'
+	call		SerTx
+	movlw		'K'
+	call		SerTx
+	movlw		' '
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'7'
+	call		SerTx
+	movlw		'C'
+	call		SerTx
+	movlw		'5'
+	call		SerTx
+	movlw		'1'
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	call		CRLF
+
+; 7 128K 27C010
+	movlw		'7'
+	call		SerTx
+	call		ColonSpace
+	movlw		'1'
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'8'
+	call		SerTx
+	movlw		'K'
+	call		SerTx
+	movlw		' '
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'7'
+	call		SerTx
+	movlw		'C'
+	call		SerTx
+	movlw		'0'
+	call		SerTx
+	movlw		'1'
+	call		SerTx
+	movlw		'0'
+	call		SerTx
+	call		CRLF
+
+; 8 256K 27C020
+	movlw		'8'
+	call		SerTx
+	call		ColonSpace
+	movlw		'2'
+	call		SerTx
+	movlw		'5'
+	call		SerTx
+	movlw		'6'
+	call		SerTx
+	movlw		'K'
+	call		SerTx
+	movlw		' '
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'7'
+	call		SerTx
+	movlw		'C'
+	call		SerTx
+	movlw		'0'
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'0'
+	call		SerTx
+	call		CRLF
+
+; 9 512K 27C040
+	movlw		'9'
+	call		SerTx
+	call		ColonSpace
+	movlw		'5'
+	call		SerTx
+	movlw		'1'
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'K'
+	call		SerTx
+	movlw		' '
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'7'
+	call		SerTx
+	movlw		'C'
+	call		SerTx
+	movlw		'0'
+	call		SerTx
+	movlw		'4'
+	call		SerTx
+	movlw		'0'
+	call		SerTx
+	call		CRLF
+
+; 0   1M 27C080
+	movlw		'0'
+	call		SerTx
+	call		ColonSpace
+	movlw		'1'
+	call		SerTx
+	movlw		'M'
+	call		SerTx
+	movlw		' '
+	call		SerTx
+	movlw		'2'
+	call		SerTx
+	movlw		'7'
+	call		SerTx
+	movlw		'C'
+	call		SerTx
+	movlw		'0'
+	call		SerTx
+	movlw		'8'
+	call		SerTx
+	movlw		'0'
+	call		SerTx
+	call		CRLF
 
 	return
 
