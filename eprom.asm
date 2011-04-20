@@ -1,4 +1,3 @@
-;
 ;	EPROM and Flash Reader
 ; 	Copyright 2008 Kevin Timmerman
 ;	http://www.compendiumarcana.com/eprom
@@ -16,9 +15,6 @@
 ;    You should have received a copy of the GNU General Public License
 ;    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ;
-;
-;
-;
 ; r  Read EPROM
 ; b  Binary
 ; h  Hex
@@ -35,82 +31,49 @@
 ; 8 256K 27C020
 ; 9 512K 27C040
 ; 0   1M 27C080
-													;
-													;
-#ifdef __18F4550									; 18F4550
-#include <p18f4550.inc>								;
-#endif												;
-													;
-													;
-													; --- Configuration Fuses
-													;
-	config	plldiv=1								; 18F4550
-	config	cpudiv=OSC1_PLL2						;
-	config	usbdiv=2								;
-	config	fosc=INTOSC_EC							;
-	config	fcmen=on								;
-	config	ieso=off								;
-	config	pwrt=on									;
-	config	bor=on									;
-	config	borv=0									;
-	config	vregen=on								;
-	config	wdt=off									; *** Change for release build
-	config	wdtps=1									;
-	config	mclre=on								;
-	config	lpt1osc=off								;
-	config	pbaden=off								;
-	config	ccp2mx=off								;
-	config	stvren=off								;
-	config	lvp=off									;
-	config	icprt=off								;
-	config	xinst=off								;
-	config	debug=on								; *** Change for release build
-	config	cp0=off									;
-	config	cp1=off									;
-	config	cp2=off									;
-	config	cp3=off									;
-	config	cpb=off									;
-	config	cpd=off									;
-	config	wrt0=off								;
-	config	wrt1=off								;
-	config	wrt2=off								;
-	config	wrt3=off								;
-	config	wrtb=off								;
-	config	wrtc=off								;
-	config	wrtd=off								;
-	config	ebtr0=off								;
-	config	ebtr1=off								;
-	config	ebtr2=off								;
-	config	ebtr3=off								;
-	config	ebtrb=off								;
-													;
-													;
-													;
-	radix dec										; Set default radix to decimal
-													;
-													;
-													;
-													; --- I/O
+
+#ifdef __18F4550
+#include <p18f4550.inc>
+#endif
+
+; --- Configuration Fuses
+	__config	_CONFIG1L, _PLLDIV_1_1L & _CPUDIV_OSC1_PLL2_1L & _USBDIV_2_1L
+	__config	_CONFIG1H, _FOSC_INTOSC_EC_1H & _FCMEM_ON_1H & _IESO_OFF_1H
+	__config	_CONFIG2L, _PWRT_ON_2L & _BOR_ON_ACTIVE_2L & _BORV_21_2L & _VREGEN_ON_2L
+; *** Change _WDT_OFF_2H -> _WDT_ON_2H for release build
+	__config	_CONFIG2H, _WDT_OFF_2H & _WDTPS_1_2H
+	__config	_CONFIG3H, _MCLRE_ON_3H & _LPT1OSC_OFF_3H & _PBADEN_OFF_3H & _CCP2MX_OFF_3H
+; *** Change _DEBUG_ON_4L -> _DEBUG_OFF_4L for release build
+	__config	_CONFIG4L, _STVREN_OFF_4L & _LVP_OFF_4L & _ICPRT_OFF_4L & _XINST_OFF_4L & _DEBUG_OFF_4L
+	__config	_CONFIG5L, _CP0_OFF_5L & _CP1_OFF_5L & _CP2_OFF_5L & _CP3_OFF_5L
+	__config	_CONFIG5H, _CPB_OFF_5H & _CPD_OFF_5H
+	__config	_CONFIG6L, _WRT0_OFF_6L & _WRT1_OFF_6L & _WRT2_OFF_6L & _WRT3_OFF_6L
+	__config	_CONFIG6H, _WRTB_OFF_6H & _WRTC_OFF_6H & _WRTD_OFF_6H
+	__config	_CONFIG7L, _EBTR0_OFF_7L & _EBTR1_OFF_7L & _EBTR2_OFF_7L & _EBTR3_OFF_7L
+	__config	_CONFIG7H, _EBTRB_OFF_7H
+
+; Set default radix to decimal
+	radix dec
+
+; --- I/O
 pAddr		equ	LATB								; EEPROM/Flash high address (A12->A19)
-													;
+
 pReset		equ	LATC								; 4040 Reset
-bReset		equ	0									;
+bReset		equ	0
 pClk		equ	LATC								; 4040 Clock
-bClk		equ	1									;
-													;
+bClk		equ	1
+
 pData		equ	PORTD								; EPROM/Flash data bus
-													;
+
 pOE			equ	LATE								; EPROM/Flash Output Enable
-bOE			equ	0									;
+bOE			equ	0
 pCE			equ	LATE								; EPROM/Flash Chip Enable
-bCE			equ	1									;
+bCE			equ	1
 pPWR32		equ	LATE								; Power control for pin 32
-bPWR32		equ	2									;
-													;
-													;
-													;
-													; --- Register usage
-													;
+bPWR32		equ	2
+
+; --- Register usage
+
 	cblock 0x00										;
 	temp											; Temps
 	temp1											;
@@ -158,177 +121,187 @@ fcOE		equ	0									; Set OE high
 fcCE		equ	1									; Set CE high
 fcA10		equ 2									; Set A10 high
 fcA11asA10	equ	3									; Use A11 as A10
-													;
-													;
-SOH			equ	0x01								; Control chars used by XYModem
-EOT			equ	0x04								;
-ACK			equ	0x06								;
-NAK			equ	0x15								;
-CAN			equ	0x18								;
-													;
-													;
-	org			0									; ----- Reset -----
-													;
-	bra			Start								; Goto main code
-													;
-													;
-													;
-													; ----- ISR -----
-													;
-	org			8									;
-													;
-	retfie											; Enable global interrupts and return
-													;
-													;
-Start												; ----- Main starts here -----
-													;
-													;
+
+; Control chars used by XYModem
+SOH			equ	0x01
+EOT			equ	0x04
+ACK			equ	0x06
+NAK			equ	0x15
+CAN			equ	0x18
+
+; ----- Reset -----
+	org			0
+	; Goto main code
+	bra			Start
+
+; ----- ISR -----
+	org			8
+	retfie	; Enable global interrupts and return
+
+; ----- Main starts here -----
+Start
 	movlw		(1<<IRCF2) | (1<<IRCF1) | (1<<IRCF0) | (1<<SCS1); Setup prescaler for 8 MHz internal clock (1 MHz default)
-	movwf		OSCCON								;
-													;
+	movwf		OSCCON
+
 	movlw		(1<<PCFG3) | (1<<PCFG2) | (1<<PCFG1) | (1<<PCFG0) ; Make all ADC pins digital
-	movwf		ADCON1								;
-													;
-	clrf		LATA								; Setup port A - All outputs low
-	clrf		TRISA								;
-													;
-	movlw		(1<<(17-12)) | (1<<(13-12))			; Setup port B - All outputs low
-	movwf		pAddr								;  (A13 and A17 are inverted)
-	clrf		TRISB								;
-													;
-	clrf		LATC								; Setup port C - Serial I/O as input, all others output
-	movlw		(1<<RX) | (1<<TX)					;
-	movwf		TRISC								;
-													;
-	clrf		LATD								; Setup port D - All outputs
-	clrf		TRISD								;
-													;
-	clrf		LATE								;
+	movwf		ADCON1
+
+; Setup port A - All outputs low
+	clrf		LATA
+	clrf		TRISA
+
+	movlw		(1<<(17-12)) | (1<<(13-12))	; Setup port B - All outputs low
+	movwf		pAddr	;  (A13 and A17 are inverted)
+	clrf		TRISB
+
+; Setup port C - Serial I/O as input, all others output
+	clrf		LATC
+	movlw		(1<<RX) | (1<<TX)
+	movwf		TRISC
+
+; Setup port D - All outputs
+	clrf		LATD
+	clrf		TRISD
+
+	clrf		LATE
 	bsf			pPWR32,bPWR32						; Turn off power
 	clrf		TRISE								; Setup port E - All outputs
-													;
-													;
-	;movlw		52-1								; 8000000 / 16 / 52 =   9,615
-	;movlw		26-1								; 8000000 / 16 / 26 =  19,231
-	movlw		13-1								; 8000000 / 16 / 13 =  38,462
-	movwf		SPBRG								;
-	movlw		0									;
-	movwf		BAUDCON								;
-	movlw		(1<<TXEN) | (1<<BRGH)				;
-	movwf		TXSTA								;
-	movlw		(1<<SPEN) | (1<<CREN)				;
-	movwf		RCSTA								;
-													;
-													;
-	clrf		flags								;
-	bsf			flags,fHex							; Default to hex upload
-													;
-	call		Setup27C256							; Default chip selection
-													;
-	movlw		'r'									;
-	call		SerTx								;
-	movlw		's'									;
-	call		SerTx								;
-	movlw		't'									;
-	call		SerTx								;
-	call		CRLF								;
-													;
-GetCmd												;
-	movlw		'>'									;
-	call		SerTx								;
-													;
-	call		SerRx								;
-	call		DispatchCmd							;
-	goto		GetCmd								;
-													;
-DispatchCmd											;
-	movwf		temp								;
-	xorlw		'C'									;
-	btfsc		STATUS,Z							;
-	goto		XYModemCRC							;
-	xorlw		'C'^'G'								;
-	btfsc		STATUS,Z							;
-	goto		YModemG								;
-	xorlw		'G'^NAK								;
-	btfsc		STATUS,Z							;
-	goto		XModem								;
-													;
-	movf		temp,W								;
-	call		SerTx								;
-	call		CRLF								;
-	movf		temp,W								;
-													;
-	xorlw		'r'									;
-	btfsc		STATUS,Z							;
-	goto		UploadEprom							;
-	xorlw		'r'^'o'								;
-	btfsc		STATUS,Z							;
-	goto		ShowOptions							;
-	xorlw		'o'^'h'								;
-	bz			SetHexMode							;
-	xorlw		'h'^'b'								;
-	bz			SetBinaryMode						;
-	xorlw		'b'^'1'								;
-	bz			Setup27C16							;
-	xorlw		'1'^'2'								;
-	bz			Setup27C32							;
-	xorlw		'2'^'3'								;
-	bz			Setup27C64							;
-	xorlw		'3'^'4'								;
-	bz			Setup27C128							;
-	xorlw		'4'^'5'								;
-	bz			Setup27C256							;
-	xorlw		'5'^'6'								;
-	bz			Setup27C512							;
-	xorlw		'6'^'7'								;
-	bz			Setup27C010							;
-	xorlw		'7'^'8'								;
-	bz			Setup27C020							;
-	xorlw		'8'^'9'								;
-	bz			Setup27C040							;
-	xorlw		'9'^'0'								;
-	bz			Setup27C080							;
-	xorlw		'0'^'`'								;
-	bz			Setup82S181							;
-	xorlw		'`'^'!'								;
-	bz			Setup82S191							;
-													;
-	movlw		'W'									;
-	call		SerTx								;
-	movlw		'T'									;
-	call		SerTx								;
-	movlw		'F'									;
-	call		SerTx								;
-	movlw		'?'									;
-	call		SerTx								;
-	goto		CRLF								;
-													;
-													;
-SetHexMode											;
-	bsf			flags,fHex							;
-	return											;
-													;
-SetBinaryMode										;
-	bcf			flags,fHex							;
-	return											;
-													;
-													;
+
+	;movlw		52-1	; 8000000 / 16 / 52 =   9,615
+	;movlw		26-1	; 8000000 / 16 / 26 =  19,231
+	movlw		13-1	; 8000000 / 16 / 13 =  38,462
+	movwf		SPBRG
+	movlw		0
+	movwf		BAUDCON
+	movlw		(1<<TXEN) | (1<<BRGH)
+	movwf		TXSTA
+	movlw		(1<<SPEN) | (1<<CREN)
+	movwf		RCSTA
+
+;DEBUG
+;loopy
+;	movlw		0xFF
+;	movwf		PORTA
+;
+;	movlw		10
+;	call		Delay_ms
+;
+;	movlw		0x00
+;	movwf		PORTA
+;
+;	movlw		10
+;	call		Delay_ms
+;
+;	goto loopy
+
+	clrf		flags
+; Default to hex upload
+	bsf			flags,fHex
+
+; Default chip selection
+	call		Setup27C256
+
+	movlw		'r'
+	call		SerTx
+	movlw		's'
+	call		SerTx
+	movlw		't'
+	call		SerTx
+	call		CRLF
+
+GetCmd
+	movlw		'>'
+	call		SerTx
+
+	call		SerRx
+	call		DispatchCmd
+	goto		GetCmd
+
+DispatchCmd
+	movwf		temp
+
+	xorlw		'C'
+	btfsc		STATUS,Z
+	goto		XYModemCRC
+	xorlw		'C'^'G'
+	btfsc		STATUS,Z
+	goto		YModemG
+	xorlw		'G'^NAK
+	btfsc		STATUS,Z
+	goto		XModem
+
+	movf		temp,W
+	call		SerTx
+	call		CRLF
+	movf		temp,W
+
+	xorlw		'r'
+	btfsc		STATUS,Z
+	goto		UploadEprom
+	xorlw		'r'^'o'
+	btfsc		STATUS,Z
+	goto		ShowOptions
+	xorlw		'o'^'h'
+	bz			SetHexMode
+	xorlw		'h'^'b'
+	bz			SetBinaryMode
+	xorlw		'b'^'1'
+	bz			Setup27C16
+	xorlw		'1'^'2'
+	bz			Setup27C32
+	xorlw		'2'^'3'
+	bz			Setup27C64
+	xorlw		'3'^'4'
+	bz			Setup27C128
+	xorlw		'4'^'5'
+	bz			Setup27C256
+	xorlw		'5'^'6'
+	bz			Setup27C512
+	xorlw		'6'^'7'
+	bz			Setup27C010
+	xorlw		'7'^'8'
+	bz			Setup27C020
+	xorlw		'8'^'9'
+	bz			Setup27C040
+	xorlw		'9'^'0'
+	bz			Setup27C080
+	xorlw		'0'^'`'
+	bz			Setup82S181
+	xorlw		'`'^'!'
+	bz			Setup82S191;
+
+	movlw		'W'
+	call		SerTx
+	movlw		'T'
+	call		SerTx
+	movlw		'F'
+	call		SerTx
+	movlw		'?'
+	call		SerTx
+	goto		CRLF
+
+SetHexMode
+	bsf			flags,fHex
+	return
+
+SetBinaryMode
+	bcf			flags,fHex
+	return
+
 Setup27C16											; Setup for 27C16 - 2K byte
 	clrf		size_h								; Size
-	movlw		16/2								;
-	movwf		size_m								;
-	clrf		size_l								;
-													;
-	clrf		pgm_mask							;
-													;
+	movlw		16/2
+	movwf		size_m
+	clrf		size_l
+
+	clrf		pgm_mask
+
 	movlw		1<<(13-12)							; A13/PWR
-	movwf		pwr_mask							;
-													;
+	movwf		pwr_mask
+
 	clrf		ctl_mask							; Enable
-													;
-	return											;
-													;
-													;
+	return
+
 Setup27C32											; Setup for 27C32 - 4K byte
 	clrf		size_h								; Size
 	movlw		32/2								;
@@ -343,8 +316,7 @@ Setup27C32											; Setup for 27C32 - 4K byte
 	clrf		ctl_mask							; Enable
 													;
 	return											;
-													;
-													;
+
 Setup27C64											; Setup for 27C64 - 8K byte
 	clrf		size_h								; Size
 	movlw		64/2								;
@@ -360,8 +332,7 @@ Setup27C64											; Setup for 27C64 - 8K byte
 	clrf		ctl_mask							; Enable
 													;
 	return											;
-													;
-													;
+
 Setup27C128											; Setup for 27C128 - 16K byte
 	clrf		size_h								; Size
 	movlw		128/2								;
@@ -377,8 +348,7 @@ Setup27C128											; Setup for 27C128 - 16K byte
 	clrf		ctl_mask							; Enable
 													;
 	return											;
-													;
-													;
+
 Setup27C256											; Setup for 27C256 - 32K byte
 	clrf		size_h								; Size
 	movlw		256/2								;
@@ -393,8 +363,7 @@ Setup27C256											; Setup for 27C256 - 32K byte
 	clrf		ctl_mask							; Enable
 													;
 	return											;
-													;
-													;
+
 Setup27C512											; Setup for 27C512 - 64K byte
 	movlw		1									; Size
 	movwf		size_h								;
@@ -409,8 +378,7 @@ Setup27C512											; Setup for 27C512 - 64K byte
 	clrf		ctl_mask							; Enable
 													;
 	return											;
-													;
-													;
+
 Setup27C010											; Setup for 27C010 - 128K byte
 	movlw		2									; Size
 	movwf		size_h								;
@@ -425,7 +393,7 @@ Setup27C010											; Setup for 27C010 - 128K byte
 	clrf		ctl_mask							; Enable
 													;
 	return											;
-													;
+
 Setup27C020											; Setup for 27C020 - 256K byte
 	movlw		4									; Size
 	movwf		size_h								;
@@ -440,7 +408,7 @@ Setup27C020											; Setup for 27C020 - 256K byte
 	clrf		ctl_mask							; Enable
 													;
 	return											;
-													;
+
 Setup27C040											; Setup for 27C040 - 512K byte
 	movlw		8									; Size
 	movwf		size_h								;
@@ -454,7 +422,7 @@ Setup27C040											; Setup for 27C040 - 512K byte
 	clrf		ctl_mask							; Enable
 													;
 	return											;
-													;
+
 Setup27C080											; Setup for 27C080 - 1M byte
 	movlw		16									; Size
 	movwf		size_h								;
@@ -468,7 +436,7 @@ Setup27C080											; Setup for 27C080 - 1M byte
 	clrf		ctl_mask							; Enable
 													;
 	return											;
-													;
+
 Setup82S181											; Setup for 82S181 - 1K byte
 	clrf		size_h								; Size
 	movlw		8/2									;
@@ -484,8 +452,7 @@ Setup82S181											; Setup for 82S181 - 1K byte
 	movwf		ctl_mask							;
 													;
 	return											;
-													;
-													;
+
 Setup82S191											; Setup for 82S191 - 2K byte
 	clrf		size_h								; Size
 	movlw		16/2								;
@@ -499,28 +466,26 @@ Setup82S191											; Setup for 82S191 - 2K byte
 													;
 	movlw		(1<<fcA10)|(1<<fcA11asA10)|(1<<fcCE); Enable
 	movwf		ctl_mask							;
-													;
-	return											;
-													;
-													;
-													;
-ShowOptions											;
-	movlw		'S'									;
-	call		SerTx								;
-	movlw		'i'									;
-	call		SerTx								;
-	movlw		'z'									;
-	call		SerTx								;
-	movlw		'e'									;
-	call		SerTx								;
-	call		ColonSpace							;
-	movf		size_h,W							;
-	call		tx_hex_byte							;
-	movf		size_m,W							;
-	call		tx_hex_byte							;
-	movf		size_l,W							;
-	call		tx_hex_byte							;
-	call		CRLF								;
+
+	return
+
+ShowOptions
+	movlw		'S'
+	call		SerTx
+	movlw		'i'
+	call		SerTx
+	movlw		'z'
+	call		SerTx
+	movlw		'e'
+	call		SerTx
+	call		ColonSpace
+	movf		size_h,W
+	call		tx_hex_byte
+	movf		size_m,W
+	call		tx_hex_byte
+	movf		size_l,W
+	call		tx_hex_byte
+	call		CRLF
 	movlw		'P'									;
 	call		SerTx								;
 	movlw		'w'									;
@@ -552,14 +517,13 @@ ShowOptions											;
 	call		tx_hex_byte							;
 	call		CRLF								;	
 	return											;
-													;
+
 SetupLen											;
 	movff		size_h,len_h						;
 	movff		size_m,len_m						;
 	movff		size_l,len_l						;
 	return											;
-													;
-													;
+
 YModemG												; --- X/Y Modem ---
 	bsf			flags,fNoAck						;
 XYModemCRC											;
@@ -574,8 +538,7 @@ XModem												;
 	bcf			flags,fFilename						;
 	bcf			flags,fNoAck						;
 	return											;
-													;
-													;
+
 UploadEprom											; --- Read EPROM and send to host ---
 													;
 	call		PowerOn								;
@@ -617,7 +580,7 @@ read_loop											;
 	call		PowerOff							;
 													;
 	return											;
-													;
+
 PowerOn												;
 	bcf			pPWR32,bPWR32						; Turn on pin 32
 	call		set_addr							; Turn on other power pins (if used)
@@ -629,7 +592,7 @@ PowerOn												;
 	btfsc		ctl_mask,fcOE						; OE high
 	bsf			pOE,bOE								;
 	return											;
-													;
+
 PowerOff											;
 	bcf			pClk,bClk							; Reset 4040
 	bsf			pReset,bReset						;
@@ -643,8 +606,7 @@ PowerOff											;
 	movwf		pAddr								;
 	bsf			pPWR32,bPWR32						; Pin 32 off
 	return											;
-													;
-													;
+
 Delay_ms											; Wait W milliseconds
 	movwf		temp								;
 ms1													;
@@ -660,7 +622,7 @@ ms2													;
 	decfsz		temp,F								;
 	goto		ms1									;
 	return											;
-													;
+
 ResetAddress										;
 	bcf			pClk,bClk							; Reset 4040
 	bsf			pReset,bReset						;
@@ -721,8 +683,7 @@ set_addr											;
 	xorlw		(1<<(17-12))|(1<<(13-12))			; Invert lines driven by transistors
 	movwf		pAddr								; Output
 	return											;
-													;
-													;
+
 BeginUpload											; --- Upload ---
 	btfsc		flags,fXYModem						;
 	call		BeginXYModem						;
@@ -731,7 +692,7 @@ BeginUpload											; --- Upload ---
 	call		BeginHex							;
 													;
 	return											;
-													;
+
 EndUpload											;
 	btfsc		flags,fHex							;
 	call		EndHex								;
@@ -747,9 +708,8 @@ UploadByte											;
 	btfsc		flags,fXYModem						;
 	goto		TxXYModem							;
 	goto		SerTx								;
-													;
-													;
-													; --- Hex ---
+
+; --- Hex ---
 BeginHex											;
 	movlw		16									; Setup line length
 	movwf		data_len							;
@@ -825,10 +785,8 @@ tx_char												;
 	btfsc		flags,fXYModem						;
 	bra			TxXYModem							;
 	goto		SerTx								;
-													;
-													;
-													; --- XYModem ---
-													;
+
+; --- XYModem ---
 BeginXYModem										; - Begin XYModem
 	clrf		xy_count							;
 	clrf		xy_block							;
@@ -894,10 +852,9 @@ null_block											;
 	call		TxXYModem							;
 	movf		xy_count,F							;
 	bnz			null_block							;
-													;
-	return											;
-													;
-													;
+
+	return
+
 BeginXYBlock										; - Begin a XYModem block
 	clrf		xy_chksum							; Init checksum
 	clrf		xy_crc_h							; Init CRC
@@ -908,7 +865,7 @@ BeginXYBlock										; - Begin a XYModem block
 	call		SerTx								;
 	comf		xy_block,W							; Block # compliment
 	goto		SerTx								;
-													;
+
 xy_pad												;
 	movlw		0x1A								; EOF (Ctrl-Z)
 	call		UpdateCRC							;
@@ -918,7 +875,7 @@ xy_pad												;
 EndXYBlock											; - End a XYModem block
 	btfss		xy_count,7							; Pad to 128 bytes
 	goto		xy_pad								;
-													;
+
 	movf		xy_chksum,W							; Send checksum/CRC
 	btfsc		flags,fCRC							;
 	movf		xy_crc_h,W							;
@@ -926,50 +883,48 @@ EndXYBlock											; - End a XYModem block
 	movf		xy_crc_l,W							;
 	btfsc		flags,fCRC							;
 	call		SerTx								;
-													;
+
 	clrf		xy_count							; Reset block byte count
 	incf		xy_block,F							; Increment block #
-													;
-	btfss		flags,fNoAck						;
-	call		SerRx								;
-													;
-	return											;
-													;
-													;
+
+	btfss		flags,fNoAck
+	call		SerRx
+
+	return
+
 TxXYModem											; - Send a byte using XYModem
 	movwf		temp2								; Save byte to send
-													;
+
 	movf		xy_count,F							; Begin new block if byte count is zero
-	btfsc		STATUS,Z							;
-	call		BeginXYBlock						;
-													;
+	btfsc		STATUS,Z
+	call		BeginXYBlock
+
 	movf		temp2,W								;
 	addwf		xy_chksum							; Update checksum
 	btfsc		flags,fCRC							; Update CRC
 	call		UpdateCRC							;
 	movf		temp2,W								; Send saved byte
-	call		SerTx								;
-													;
+	call		SerTx
+
 	incf		xy_count,F							; Inc byte count
 	btfsc		xy_count,7							; End block if byte count is >= 128
-	call		EndXYBlock							;
-													;
-	return											;
-													;
-													;
-UpdateCRC											;
-													; Simple CRC routine
-													; from John Payson 1998-10-23
-													;
-													; 1021 << 0 ==   10 21
-													; 1021 << 1 ==   20 42
-													; 1021 << 2 ==   40 84
-													; 1021 << 3 ==   81 08
-													; 1021 << 4 == 1 02 10 ^ 10 21 == 1 12 31
-													; 1021 << 5 == 2 04 20 ^ 20 42 == 2 24 62
-													; 1021 << 6 == 4 08 40 ^ 40 84 == 4 48 C4
-													; 1021 << 7 == 8 10 80 ^ 81 08 == 8 91 88
-													;
+	call		EndXYBlock
+
+	return
+
+UpdateCRC
+; Simple CRC routine
+; from John Payson 1998-10-23
+;
+; 1021 << 0 ==   10 21
+; 1021 << 1 ==   20 42
+; 1021 << 2 ==   40 84
+; 1021 << 3 ==   81 08
+; 1021 << 4 == 1 02 10 ^ 10 21 == 1 12 31
+; 1021 << 5 == 2 04 20 ^ 20 42 == 2 24 62
+; 1021 << 6 == 4 08 40 ^ 40 84 == 4 48 C4
+; 1021 << 7 == 8 10 80 ^ 81 08 == 8 91 88
+
 	xorwf		xy_crc_h							; Add new data to CRC
 													;
 	movlw		0									; Compute the LSB first [based upon MSB]
@@ -989,73 +944,68 @@ UpdateCRC											;
 	xorlw		0xC4								;
 	btfsc		xy_crc_h,7							;
 	xorlw		0x88								;
-													; Swap xy_crc_l with W
-	xorwf		xy_crc_l,F							;
-	xorwf		xy_crc_l,W							;
-	xorwf		xy_crc_l,F							;
-													; Next compute the MSB [note W holds old LSB]
-	btfsc		xy_crc_h,0							;
-	xorlw		0x10								;
-	btfsc		xy_crc_h,1							;
-	xorlw		0x20								;
-	btfsc		xy_crc_h,2							;
-	xorlw		0x40								;
-	btfsc		xy_crc_h,3							;
-	xorlw		0x81								;
-	btfsc		xy_crc_h,4							;
-	xorlw		0x12								;
-	btfsc		xy_crc_h,5							;
-	xorlw		0x24								;
-	btfsc		xy_crc_h,6							;
-	xorlw		0x48								;
-	btfsc		xy_crc_h,7							;
-	xorlw		0x91								;
-	movwf		xy_crc_h							;
-													;
-	return											;
-													;
-													;
-													;
-SerRx												; --- Receive from hardware UART
-	clrwdt											;
-	btfss		PIR1,RCIF							; Wait for a rx char
-	bra			SerRx								;
-	movf		RCSTA,W								;
-	andlw		(1<<FERR) | (1<<OERR)				;
-	bz			no_com_error						;
-	bcf			RCSTA,CREN							;
-	bsf			RCSTA,CREN							;
+
+	; Swap xy_crc_l with W
+	xorwf		xy_crc_l,F
+	xorwf		xy_crc_l,W
+	xorwf		xy_crc_l,F
+
+	; Next compute the MSB [note W holds old LSB]
+	btfsc		xy_crc_h,0
+	xorlw		0x10
+	btfsc		xy_crc_h,1
+	xorlw		0x20
+	btfsc		xy_crc_h,2
+	xorlw		0x40
+	btfsc		xy_crc_h,3
+	xorlw		0x81
+	btfsc		xy_crc_h,4
+	xorlw		0x12
+	btfsc		xy_crc_h,5
+	xorlw		0x24
+	btfsc		xy_crc_h,6
+	xorlw		0x48
+	btfsc		xy_crc_h,7
+	xorlw		0x91
+	movwf		xy_crc_h
+
+	return
+
+; --- Receive from hardware UART
+SerRx
+	clrwdt
+	btfss		PIR1,RCIF		; Wait for a rx char
+	bra			SerRx
+	movf		RCSTA,W
+	andlw		(1<<FERR) | (1<<OERR)
+	bz			no_com_error
+	bcf			RCSTA,CREN
+	bsf			RCSTA,CREN
 	bra			SerRx								; rx error...
-no_com_error										;
+no_com_error
 	movf		RCREG,W								; Get rx char
-	return											;
-													;
-													;
-SerTx												; --- Transmit with hardware UART
-	clrwdt											;
-	btfss		PIR1,TXIF							; Wait for a tx buffer available
-	bra			SerTx								;
-													;
-	movwf		TXREG								; Send char
-													;
-	return											;
-													;
-													;
-													;
-ColonSpace											;
-	movlw		':'									;
-	rcall		SerTx								;
-	movlw		' '									;
-	bra			SerTx								;
-													;
-CRLF												;
-	movlw		13									;
-	rcall		SerTx								;
-	movlw		10									;
-	bra			SerTx								;
-													;
-													;
-	end												;
-													;
-													;
+	return
+
+; --- Transmit with hardware UART
+SerTx
+	clrwdt
+	btfss		PIR1,TXIF		; Wait for a tx buffer available
+	bra			SerTx
+
+	movwf		TXREG		; Send char
+	return
+
+ColonSpace
+	movlw		':'
+	rcall		SerTx
+	movlw		' '
+	bra			SerTx
+
+CRLF
+	movlw		13
+	rcall		SerTx
+	movlw		10
+	bra			SerTx
+
+	end
 
