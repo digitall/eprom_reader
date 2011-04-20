@@ -1,0 +1,14 @@
+EPROM Reader
+============
+
+* Based on original design from http://www.compendiumarcana.com/eprom/
+  licensed under GPLv3.
+
+* Component cost about 20 USD.
+
+Allows dumping of 27 series and pin compatible (E)PROMs
+from 2K (27C16) to 1M (27C080).
+
+Other 5V devices with linear read addressing can be read
+by constructing a suitable DIP to connector adapter i.e.
+8/16-bit game cartridges such as VCS2600 and NES.

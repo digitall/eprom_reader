@@ -1,0 +1,6 @@
+TODO:
+
+* Add support for chips with inverted CE/OE polarity compared to
+  normal 27 series specification.
+* Add support for address triggered bank switching, specifically
+  VCS2600 8K 0x1FF8 standard bank switching.
