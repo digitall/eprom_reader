@@ -108,6 +108,8 @@ bPWR32		equ	2
 	xy_chksum										; XModem cheksum
 	xy_crc_h										; XYModem CRC
 	xy_crc_l										;
+
+	addr_h_old
 	endc											;
 													;
 fHex		equ	0									; Hex upload flag
@@ -1123,6 +1125,7 @@ ResetAddress										;
 	clrf		addr_l								; Clear address registers
 	clrf		addr_m								;
 	clrf		addr_h								;
+	clrf		addr_h_old								;
 	bcf			pReset,bReset						; Release 4040 reset
 													;
 	btfsc		ctl_mask,fcA10						; Set A10 high
@@ -1220,8 +1223,30 @@ EndHex												;
 	call		EOL									;
 	return											;
 													;
+ExtHex
+	movlw		2
+	movwf		data_len
+	movlw		4
+	movwf		rec_type
+	call		BOL
+	movlw		0
+	call		tx_hex_byte
+	movf		addr_h,W
+	call		tx_hex_byte
+	call		EOL
+	call		BeginHex
+	return
+
 TxHex												; - Send hex byte
 	movwf		temp								;
+
+	movf		addr_h,W
+	subwf		addr_h_old,W
+	btfss		STATUS,Z
+	call		ExtHex
+;
+	movf		addr_h,W
+	movwf		addr_h_old
 													;
 	movf		hex_count,F							;
 	btfsc		STATUS,Z							;
