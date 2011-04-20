@@ -1,0 +1,3 @@
+#!/bin/sh
+rm eprom.cod eprom.lst eprom.hex -f
+gpasm -p18f4550 -y eprom.asm

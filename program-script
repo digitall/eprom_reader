@@ -1,0 +1,5 @@
+#!/bin/sh
+pk2cmd -I -P -F eprom.hex -M
+
+# Power From Programmer After Operations
+#pk2cmd -I -P -F eprom.hex -M -R -T
